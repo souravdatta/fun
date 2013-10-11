@@ -1,6 +1,5 @@
 // A simple path finding game
 #include <iostream>
-#include <conio.h>
 #include <cstdlib>
 #include <cmath>
 #include <vector>
@@ -8,22 +7,35 @@
 
 using namespace std;
 
-int W[4][4] = {
-    {0, 0, 0, 0},
-    {0, 0, 0, 0},
-    {0, 2, 0, 0},
-    {0, 0, 0, 1}
+int W[10][10] = {
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 3, 2, 0, 0, 0, 0, 0},
+    {0, 0, 3, 3, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 3, 3, 0, 0, 3, 0, 0, 0, 0},
+    {3, 0, 0, 0, 3, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 3, 0, 0, 0, 0, 0},
+    {1, 3, 0, 0, 0, 0, 0, 0, 0, 0},
 };
 
-int N = 4;
-int R1 = 3, R2 = 3;
-int P1 = 2, P2 = 1;
+int N = 10;
+int R1 = 9, R2 = 0;
+int P1 = 3, P2 = 4;
 
 inline void show()
 {
     for (int i = 0; i < N; i++) {
         for (int j = 0; j < N; j++) {
-            cout << W[i][j] << " ";
+            char ch = '.';
+            if (W[i][j] == 1)
+                ch = 'H';
+            else if (W[i][j] == 2)
+                ch = 'B';
+            else if (W[i][j] == 3)
+                ch = 'X';
+            cout << ch << " ";
         }
         cout << endl;
     }
@@ -33,6 +45,11 @@ inline void show()
 int cost(int i, int j)
 {
     return abs(R1 - i) + abs(R2 - j);
+}
+
+bool found()
+{
+    return ((P1 == R1) && (P2 == R2));
 }
 
 struct Node
@@ -59,7 +76,8 @@ inline void findpath()
                 (i == P1 - 1 && j == P2 - 1) ||
                 (i == P1 - 1 && j == P2 + 1) ||
                 (i == P1 + 1 && j == P2 - 1) ||
-                (i == P1 + 1 && j == P2 + 1))
+                (i == P1 + 1 && j == P2 + 1) ||
+                (W[i][j] == 3))
                 continue;
 
             if (i == P1 - 1 || i == P1 + 1) {
@@ -90,7 +108,7 @@ inline void findpath()
 int main()
 {
     char ans = 'Y';
-    while (ans == 'Y' || ans == 'y') {
+    while (!found() && (ans == 'Y' || ans == 'y' || ans == '\n')) {
         show();
         findpath();
         cout << "Next? (Y/N) ";
