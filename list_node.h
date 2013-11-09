@@ -27,14 +27,14 @@ void *ln_get_root(const struct list_node *n)
 }
 
 /* Adds a new node at the end of the list */
-void ln_add_node(struct list_node **start, struct list_node *next)
+struct list_node *ln_add_node(struct list_node **start, struct list_node *next)
 {
     struct list_node *it;
     
     if (*start == NULL) {
         /* No node yet, next is our starting node */
         *start = next;
-        return;
+        return next;
     }
 
     it = *start;
@@ -45,6 +45,7 @@ void ln_add_node(struct list_node **start, struct list_node *next)
     if (next != NULL)
         next->prev = it;
     next->next = NULL; /* Just in case... */
+    return next;
 }
 
 /* Removes a node */
