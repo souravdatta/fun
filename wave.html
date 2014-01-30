@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+	<head>
+		<title>Wave</title>
+		<script src="raphael-min.js"></script>
+		<script src="wave.js"></script>
+	</head>
+	<body>
+		<script>
+			var paper = Raphael(0, 0, 400, 400);
+			var center = paper.circle(200, 200, 20);
+			center.attr('fill', '#ff0000');
+			center.attr('stroke', '#ff0000');
+			center.glow();
+			center.mousedown(function (e) {
+				var wave = new Wave({
+					rad: 30,
+					cx: 200,
+					cy: 200,
+					paper: paper
+				});
+				wave.start();
+			});
+		</script>
+		
+	</body>
+</html>
