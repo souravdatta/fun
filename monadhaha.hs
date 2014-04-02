@@ -1,6 +1,6 @@
 module MonadHaha
-	where
-	
+    where
+
 -- the monad
 data StateMonad a = StateMonad a
 
@@ -8,6 +8,8 @@ data StateMonad a = StateMonad a
 comb :: StateMonad a -> (a -> StateMonad b) -> StateMonad b
 comb (StateMonad candidate) fn = fn candidate
 
+wrap :: (a -> b) -> (a -> b -> StateMonad a) -> (a -> StateMonad a)
+wrap fn conv = \x -> conv x (fn x)
 
 -- the state	
 data ProdInfo = ProdInfo (Double, String, String)
@@ -16,17 +18,21 @@ data ProdInfo = ProdInfo (Double, String, String)
 price :: StateMonad ProdInfo -> Double
 price (StateMonad (ProdInfo (p, _, _))) = p
 
--- two state transition functions
-discount1 :: ProdInfo -> StateMonad ProdInfo
-discount1 (ProdInfo (p, pid, sid)) = if pid == "prod1"
-	then StateMonad (ProdInfo (p - 10, pid, sid))
-	else StateMonad (ProdInfo (p - 20, pid, sid))
+-- a converter
+conv :: ProdInfo -> Double -> StateMonad ProdInfo
+conv (ProdInfo (_, pid, sid)) newp = StateMonad (ProdInfo (newp, pid, sid))
 
-discount2 :: ProdInfo -> StateMonad ProdInfo
+-- two state transition functions
+discount1 :: ProdInfo -> Double
+discount1 (ProdInfo (p, pid, sid)) = if pid == "prod1"
+    then p - 10
+    else p - 20
+
+discount2 :: ProdInfo -> Double
 discount2 (ProdInfo (p, pid, sid)) = if sid == "state1"
-	then StateMonad (ProdInfo (p - 20, pid, sid))
-	else StateMonad (ProdInfo (p - 10, pid, sid))
+    then p - 20
+    else p - 10
 
 -- now the application
 applyDiscounts :: ProdInfo -> Double
-applyDiscounts prodInfo = price ((StateMonad prodInfo) `comb` discount1 `comb` discount2)
+applyDiscounts prodInfo = price ((StateMonad prodInfo) `comb` (wrap discount1 conv) `comb` (wrap discount2 conv))
