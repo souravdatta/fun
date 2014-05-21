@@ -47,13 +47,11 @@ bubbleSort(L1, L2) :- length(L1, Len), bubble_loop(L1, Len, L2).
 
 %% insertion sort
 
-maxElement([X], X).
-maxElement([H|Rest], H) :- maxElement(Rest, M), H > M.
-maxElement([H|Rest], M) :- maxElement(Rest, M), H =< M.
+insert(X, [], [X]).
+insert(X, [A|Rest], [X,A|Rest]) :- X =< A.
+insert(X, [A|Rest], [A|Inserted]) :- X > A, insert(X, Rest, Inserted).
 
-insertSort([], []).
-insertSort(L1, L4) :-
-    maxElement(L1, M),
-    select(M, L1, L2),
-    insertSort(L2, L3),
-    append(L3, [M], L4).
+i_sort([], Accm, Accm).
+i_sort([X|Rest], Accm, Sorted) :- insert(X, Accm, NewAccm), i_sort(Rest, NewAccm, Sorted).
+
+isort(L1, L2) :- i_sort(L1, [], L2).
