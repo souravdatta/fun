@@ -4,11 +4,12 @@ import os
 
 LINK_FROM = r'(src|href)="http://learnyousomeerlang.com/' 
 LINK_TO = r'\1="'
+ENCODING = 'latin-1'
 
 
 def convert_links(fname):
     file = open(fname, 'rb')
-    content = file.read()
+    content = file.read().decode(ENCODING)
     file.close()
     basename = os.path.basename(fname)
     dirname = os.path.dirname(fname)
@@ -18,7 +19,7 @@ def convert_links(fname):
         LINK_FROM,
         LINK_TO, 
         content)
-    filew.write(content)
+    filew.write(str.encode(content, ENCODING))
     filew.close()
     os.remove(fname)
     os.rename(nfname, fname)
@@ -30,7 +31,7 @@ def main():
     for dp, dn, files in os.walk(start):
         for f in files:
             fname = os.path.join(dp, f)
-            print '[converting] ', fname
+            print('[converting] ', fname)
             convert_links(fname)
 
 
