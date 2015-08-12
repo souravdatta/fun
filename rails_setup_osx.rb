@@ -102,8 +102,4 @@ Cmd.exec_true('rbenv rehash')
 Cmd.exec_output('rails -v')
 Cmd.exec_output('which rails')
 
-puts "=Done="
-
-
-
-
+puts '=Done='
