@@ -13,8 +13,8 @@ sub list_music {
     die unless $music_array;
     
     foreach my $m (reverse @$music_array) {
-	    print "$i. $m->{title}\n";
-	    $i++;
+	print "$i. $m->{title}\n";
+	$i++;
     }
 }
 
@@ -30,31 +30,31 @@ sub choice_loop {
     chomp $choice;
 
     if (! $choice) {
-	    print "No choice given, try again!\n";
-	    $repeat = 1;
+	print "No choice given, try again!\n";
+	$repeat = 1;
     }
     elsif ($choice =~ /(quit)|(exit)/i) {
-	    print "Exit program...\n";
-	    exit 0;
+	print "Exit program...\n";
+	exit 0;
     }
     elsif ($choice =~ /list/i) {
-	    print "listing musics\n";
-	    list_music $music_array;
-	    $repeat = 1;
+	print "listing musics\n";
+	list_music $music_array;
+	$repeat = 1;
     }
     else {
-	    $choice = int $choice;
-	    if (($choice < 1) || ($choice > scalar(@$music_array))) {
-	        print "Choice is not between 1 to ", scalar(@$music_array), "\n";
-	        $repeat = 1;
-	    }
-	    else {
-	        return $choice;
-	    }
+	$choice = int $choice;
+	if (($choice < 1) || ($choice > scalar(@$music_array))) {
+	    print "Choice is not between 1 to ", scalar(@$music_array), "\n";
+	    $repeat = 1;
+	}
+	else {
+	    return $choice;
+	}
     }
 
     if ($repeat) {
-	    choice_loop($music_array);
+	choice_loop($music_array);
     }
 }
 
@@ -64,7 +64,7 @@ sub start_loop {
     my $show_list = shift;
 
     if (! defined($show_list)) {
-	    $show_list = 1;
+	$show_list = 1;
     }
 
     die unless $music_array;
@@ -75,24 +75,24 @@ sub start_loop {
     my $command = "";
 
     if ($^O eq "darwin") {
-	    $command = "open";
+	$command = "open";
     }
     elsif ($^O eq "MSWin32") {
-	    $command = "explorer";
+	$command = "explorer";
     }
     else {
-	    $command = "xdg-open";
+	$command = "xdg-open";
     }
 
     eval {
-	    system ("$command " . $music_array->[scalar(@$music_array) - $choice]->{guid});
+	system ("$command " . $music_array->[scalar(@$music_array) - $choice]->{guid});
     };
 
     if ($@) {
-	    print "Could not play the music, please download/play ", 
-	        $music_array->[scalar(@$music_array) - $choice]->{guid},
-	        " yourself... :-X\n";
-	    exit 0;
+	print "Could not play the music, please download/play ", 
+	    $music_array->[scalar(@$music_array) - $choice]->{guid},
+	    " yourself... :-X\n";
+	exit 0;
     }
 
     start_loop($music_array, 0);
@@ -100,7 +100,7 @@ sub start_loop {
 
 
 my $ua = LWP::UserAgent->new(agent => "Mozilla/5.0",
-			                 timeout => 10);
+			     timeout => 10);
 my $response = $ua->get("https://musicforprogramming.net/rss.php");
 
 if ($response->is_success) {
@@ -113,4 +113,3 @@ if ($response->is_success) {
 else {
     print $response->status_line, "\n";
 }
-
