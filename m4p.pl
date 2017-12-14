@@ -46,7 +46,13 @@ sub choice_loop {
 	$repeat = 1;
     }
     else {
-	$choice = int $choice;
+	if ($choice =~ /^[0-9]+$/) {
+	    $choice = int $choice;
+	}
+	else {
+	    $choice = 0;
+	}
+	
 	if (($choice < 1) || ($choice > scalar(@$music_array))) {
 	    print "Choice is not between 1 to ", scalar(@$music_array), "\n";
 	    $repeat = 1;
@@ -148,4 +154,3 @@ if ($response->is_success) {
 else {
     print $response->status_line, "\n";
 }
-
