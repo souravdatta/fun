@@ -4,7 +4,11 @@ use warnings;
 use XML::Simple;
 use LWP::UserAgent;
 use Data::Dumper;
+use File::Spec;
+use File::HomeDir;
 
+
+my $ua = LWP::UserAgent->new(agent => "Mozilla/5.0");
 
 sub list_music {
     my $music_array = shift;
@@ -38,7 +42,6 @@ sub choice_loop {
 	exit 0;
     }
     elsif ($choice =~ /list/i) {
-	print "listing musics\n";
 	list_music $music_array;
 	$repeat = 1;
     }
@@ -59,6 +62,30 @@ sub choice_loop {
 }
 
 
+sub download_file {
+    my $file_name = shift;
+    my $url = shift;
+
+    die unless $file_name && $url;
+
+    if (! -e $file_name) {
+	print "Please wait while I download the file...\n";
+	my $response = $ua->get($url);
+
+	if ($response->is_success) {
+	    open DOWNLOAD, ">$file_name";
+	    binmode DOWNLOAD;
+	    print DOWNLOAD $response->decoded_content;
+	    close DOWNLOAD;
+	}
+	else {
+	    die "Could not download song!!!";
+	}
+    }
+
+    print "Ok\n";
+}
+
 sub start_loop {
     my $music_array = shift;
     my $show_list = shift;
@@ -72,6 +99,16 @@ sub start_loop {
     list_music $music_array if $show_list;
     
     my $choice = choice_loop $music_array;
+
+    my $title = $music_array->[scalar(@$music_array) - $choice];
+    my $title_name = $title->{title};
+    $title_name =~ s/[\s\:]/_/g;
+    my $file_name = File::Spec->catfile(File::HomeDir->my_home,
+					"music4programming",
+					($title_name . ".mp3"));
+
+    download_file $file_name, $title->{guid};
+    
     my $command = "";
 
     if ($^O eq "darwin") {
@@ -85,12 +122,12 @@ sub start_loop {
     }
 
     eval {
-	system ("$command " . $music_array->[scalar(@$music_array) - $choice]->{guid});
+	system ("$command $file_name");
     };
 
     if ($@) {
-	print "Could not play the music, please download/play ", 
-	    $music_array->[scalar(@$music_array) - $choice]->{guid},
+	print "Could not play the music, please play ", 
+	    $file_name,
 	    " yourself... :-X\n";
 	exit 0;
     }
@@ -99,8 +136,6 @@ sub start_loop {
 }
 
 
-my $ua = LWP::UserAgent->new(agent => "Mozilla/5.0",
-			     timeout => 10);
 my $response = $ua->get("https://musicforprogramming.net/rss.php");
 
 if ($response->is_success) {
@@ -113,3 +148,4 @@ if ($response->is_success) {
 else {
     print $response->status_line, "\n";
 }
+
