@@ -6,8 +6,9 @@ use LWP::UserAgent;
 use Data::Dumper;
 use File::Spec;
 use File::HomeDir;
+use File::Path qw/make_path/;
 
-
+my $other_program = "";
 my $ua = LWP::UserAgent->new(agent => "Mozilla/5.0");
 
 sub list_music {
@@ -109,14 +110,29 @@ sub start_loop {
     my $title = $music_array->[scalar(@$music_array) - $choice];
     my $title_name = $title->{title};
     $title_name =~ s/[\s\:]/_/g;
-    my $file_name = File::Spec->catfile(File::HomeDir->my_home,
-					"music4programming",
-					($title_name . ".mp3"));
+    my $dir_name = File::Spec->catfile(File::HomeDir->my_home,
+				       "music4programming");
+    my $title_name_mp3 = $title_name . ".mp3";
+    my $file_name = File::Spec->catfile($dir_name,
+					$title_name_mp3);
+
+
+    # Make directory if not present
+    if (! ((-e $dir_name) || (-d $dir_name))) {
+	print "Creating directory $dir_name for storing downloaded music\n";
+	eval {
+	    make_path $dir_name;
+	};
+	if ($@) {
+	    die "Could not create directory $dir_name!!\n";
+	}
+    }
 
     download_file $file_name, $title->{guid};
     
     my $command = "";
-
+    my $message = "";
+    
     if ($^O eq "darwin") {
 	$command = "open";
     }
@@ -124,18 +140,49 @@ sub start_loop {
 	$command = "explorer";
     }
     else {
-	$command = "xdg-open";
+	my $other_program_needed = 1;
+	
+	if ($other_program) {
+	    print "Playing with $other_program, yes? (yes/no): ";
+	    my $ans = <STDIN>;
+	    chomp $ans;
+
+	    if ($ans !~ /yes/i) {
+		$other_program_needed = 1;
+	    }
+	    else {
+		$other_program_needed = 0;
+	    }
+	}
+	
+	if ($other_program_needed) {
+	    print "Please type the command to open your music player (Enter if you are not sure): ";
+	    $other_program = <STDIN>;
+	    chomp $other_program;
+	}
+
+	if ($other_program) {
+	    $command = $other_program;
+	}
+	else {
+	    $message = "Please play $file_name with your music player!!";
+	}
     }
 
-    eval {
-	system ("$command $file_name");
-    };
-
-    if ($@) {
-	print "Could not play the music, please play ", 
-	    $file_name,
-	    " yourself... :-X\n";
-	exit 0;
+    if (! $message) {
+	eval {
+	    system ("$command $file_name");
+	};
+	
+	if ($@) {
+	    print "Could not play the music, please play ", 
+		$file_name,
+		" yourself... :-X\n";
+	    exit 0;
+	}
+    }
+    else {
+	print $message, "\n";
     }
 
     start_loop($music_array, 0);
